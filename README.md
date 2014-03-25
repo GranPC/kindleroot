@@ -1,4 +1,6 @@
-kindleroot
-==========
+Kindle Root Tool
+================
 
-Hang on I haven't uploaded it yet.
+This is a very very very early alpha tool to make it easy restore, root and backup your Kindle Fire HD 7" 2013, also known as KFSOWI or soho.
+
+Pull requests are welcome.
