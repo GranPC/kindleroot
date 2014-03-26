@@ -24,6 +24,8 @@ require "adb"
 
 print( _BUILD.NAME .. " " .. _BUILD.VERSION .. " starting up..." )
 
+EMULATE_DEVICE_INTERACTION = false
+
 -- it begins...
 
 ui.present( util.os() )

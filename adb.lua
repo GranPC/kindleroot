@@ -16,19 +16,38 @@ function adb.waitfordevice( callback )
 		end
 	end
 
-	util.run( command, adbcallback )
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing ADB device detection... Would have run \"" .. command .. "\"" )
+		callback( true )
+	else
+		util.run( command, adbcallback )
+	end
 end
 
+local emulatedoutputs = {}
+emulatedoutputs[ "getprop ro.rom.type" ] = "minisystem"
+
 function adb.run( command, callback )
+	local sh = command
 	local command = util.generatecall( "adb", "-s product:soho shell " .. command )
 
-	util.run( command, callback )
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing ADB shell command... Would have run \"" .. command .. "\"" )
+		callback( 0, emulatedoutputs[ sh ] or "nothing happens..." )
+	else
+		util.run( command, callback )
+	end
 end
 
 function adb.push( what, where, callback )
 	local command = util.generatecall( "adb", "-s product:soho push " .. what .. " " .. where )
 
-	util.run( command, callback )
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing ADB push... Would have run \"" .. command .. "\"" )
+		callback( 0, "OK" )
+	else
+		util.run( command, callback )
+	end
 end
 
 function adb.reboot( mode, callback )
@@ -36,5 +55,10 @@ function adb.reboot( mode, callback )
 
 	local command = util.generatecall( "adb", "-s product:soho reboot" .. mode )
 
-	util.run( command, callback )
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing ADB reboot... Would have run \"" .. command .. "\"" )
+		callback( 0, "" )
+	else
+		util.run( command, callback )
+	end
 end

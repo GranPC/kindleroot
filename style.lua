@@ -14,7 +14,7 @@ styles.main = [[
 	background: transparent;
 }
 
-QLabel, QRadioButton
+QLabel, QRadioButton, QCheckBox
 {
 	color: #dddddd;
 	font-family: 'Open Sans';
@@ -93,12 +93,12 @@ QPushButton[class=action]
 	border-radius: 4px;
 }
 
-QPushButton[class=action]:pressed, QRadioButton::indicator:pressed
+QPushButton[class=action]:pressed, QRadioButton::indicator:pressed, QCheckBox::indicator:pressed
 {
 	background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #777777, stop: 0.06 #303030, stop: 1 #161616 );
 }
 
-QRadioButton::indicator
+QRadioButton::indicator, QCheckBox::indicator
 {
 	width: 14px;
 	height: 14px;
@@ -108,11 +108,21 @@ QRadioButton::indicator
 	margin-right: 3px;
 }
 
-QRadioButton::indicator:checked
+QCheckBox::indicator
+{
+	border-radius: 2px;
+}
+
+QRadioButton::indicator:checked, QCheckBox::indicator:checked
 {
 	background-image: url(images/indicator_dot.png);
 	background-repeat: no-repeat;
 	background-position: center center;
+}
+
+QCheckBox::indicator:checked
+{
+	background-image: url(images/indicator_check.png);
 }
 
 #close

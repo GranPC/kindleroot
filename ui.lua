@@ -505,28 +505,41 @@ function ui.debrick_step4()
 										contents.progresslabel:setText( language.debrick_preparingsystem )
 										contents.progresslabel:adjustSize()
 
-
 										adb.run( "su -c \"mkdir /cache/recovery\"", function( code, out )
-											adb.run( "su -c \"cp /sdcard/update.zip /cache/update.zip\"", function( code, out )
-												_application.beep()
-												adb.run( "su -c \"echo --update_package=/cache/update.zip > /cache/recovery/command\"", function( code, out )
-													contents.progresslabel:setText( language.debrick_done )
-													contents.progresslabel:adjustSize()
 
-													adb.reboot( "recovery", function( code, out )
-														print( "We're done!", code )
-													end )
+											local proceed = function()
 
-													ui.setbuttons( contents.buttongroup,
-													{
+												adb.run( "su -c \"cp /sdcard/update.zip /cache/update.zip\"", function( code, out )
+													_application.beep()
+													adb.run( "su -c \"echo --update_package=/cache/update.zip > /cache/recovery/command\"", function( code, out )
+														contents.progresslabel:setText( language.debrick_done )
+														-- todo: this is a pain. maybe we can reboot into fastboot, flash recovery into system and then continue?
+														-- if we do it like that, the user would have plenty of time to unplug the fastboot cable.
+														contents.progresslabel:adjustSize()
+
+														adb.reboot( "recovery", function( code, out )
+															print( "We're done!", code )
+														end )
+
+														ui.setbuttons( contents.buttongroup,
 														{
-															name = "exit",
-															text = language.exit,
-															action = ui.debrick_cancel
-														}
-													} )
+															{
+																name = "exit",
+																text = language.exit,
+																action = ui.debrick_cancel
+															}
+														} )
+													end )
 												end )
-											end )
+											end
+
+											if not contents.dowipe then
+												proceed()
+											else
+												contents.progresslabel:setText( language.debrick_wiping )
+												adb.run( "su -c \"rm -rf /data/*\"", proceed )
+											end
+
 										end )
 									end
 								end )
@@ -596,7 +609,7 @@ function ui.debrick_step3()
 				{
 					name = "next",
 					text = language.next,
-					action = ui.debrick_cancel -- TODO!!!
+					action = ui.debrick_step4
 				}
 			} )
 		end
@@ -624,6 +637,8 @@ function ui.debrick_step2()
 	end
 
 	contents.fireosversion = version
+	contents.dowipe = contents.wipecheckbox:isChecked()
+	contents.wipecheckbox:delete()
 
 	contents.elements = {}
 
@@ -765,6 +780,12 @@ function ui.debrick()
 
 		y = y + 24
 	end
+
+	local wipe = createwidget( QCheckBox, contents )
+	wipe:setText( language.debrick_wipe )
+	wipe:move( 15, y )
+
+	contents.wipecheckbox = wipe
 
 	radio:setChecked( true )
 

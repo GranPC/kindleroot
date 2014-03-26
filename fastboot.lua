@@ -20,7 +20,11 @@ function fastboot.waitfordevice( callback )
 		end
 	end
 
-	util.run( command, fastcallback )
+	if EMULATE_DEVICE_INTERACTION then
+		callback( true )
+	else
+		util.run( command, fastcallback )
+	end
 end
 
 function fastboot.flash( partition, file, callback )
@@ -38,11 +42,21 @@ function fastboot.flash( partition, file, callback )
 
 	local command = util.generatecall( "fastboot", "-i " .. fastboot.id .. " flash " .. partition .. " " .. file )
 
-	util.run( command, callback )
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing FB flash command... Would have run \"" .. command .. "\"" )
+		callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+	else
+		util.run( command, callback )
+	end
 end
 
 function fastboot.continue( callback )
 	local command = util.generatecall( "fastboot", "-i " .. fastboot.id .. " continue" )
 
-	util.run( command, callback )
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing FB continue command... Would have run \"" .. command .. "\"" )
+		callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+	else
+		util.run( command, callback )
+	end
 end

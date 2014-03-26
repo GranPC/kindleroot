@@ -56,6 +56,7 @@ language.debrick_flashingminisystem = "Flashing minisystem.img..."
 language.debrick_waitingboot = "Waiting for boot..."
 language.debrick_failedhelp = "Failed! (%s) -- please unplug your device and retry. If the error persists, please turn off your device and ask for help."
 language.debrick_uploadingsystem = "Uploading FireOS..."
+language.debrick_wiping = "Wiping data..."
 language.debrick_preparingsystem = "Preparing to install FireOS..."
 language.debrick_done = "Done! Rebooting into recovery and installing... Disconnect your factory cable now!"
 
@@ -67,6 +68,8 @@ language.downloadsuccess = "Downloaded successfully!"
 
 language.next = "Next"
 language.cancel = "Cancel"
+
+language.debrick_wipe = "Wipe all data on device"
 
 language.disclaimer = "Disclaimer"
 language.disclaimer_text = "This is alpha software. It is not guaranteed to work. By using it, you agree that the author shall have no liability for consequential or incidental damage resulting from the use of this software."

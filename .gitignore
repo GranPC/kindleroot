@@ -1,0 +1,10 @@
+# screw you OSX
+
+*.DS_Store
+
+socket
+*.dll
+*.so
+*.exe
+adb
+fastboot
