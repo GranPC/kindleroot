@@ -1,5 +1,15 @@
 util = {}
 
+local oldprint = print
+
+function print( ... )
+	local inf = debug.getinfo( 2 )
+	local name = inf.short_src
+	name = name:gsub( ".[\\/]", "" )
+	
+	return oldprint( "[" .. name .. ":" .. inf.currentline .. "] ", ... )
+end
+
 function util.os()
 	return _BUILD.OS -- blergh
 end
@@ -30,6 +40,10 @@ function util.run( command, callback )
 end
 
 -- sigh
+
+-- here's an explanation on this POS: apparently lqt craps out if you bind a
+-- signal directly to a lua function. it instantly crashes. this is a crappy
+-- workaround. i should fix the crash issue instead.
 
 local wrapper = QObject.new()
 local id = 0

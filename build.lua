@@ -1,4 +1,5 @@
 _BUILD = {}
-_BUILD.OS			= "Windows"
-_BUILD.NAME			= "Kindle Root Tool"
-_BUILD.VERSION		= "0.1-devel"
+_BUILD.OS			= "OSX"
+_BUILD.NAME			= "Firerooter"
+_BUILD.VERSION		= "0.2-devel"
+_BUILD.VERSIONCODE	= 1

@@ -42,8 +42,23 @@ download.files[ "11.3.2.1.bin" ] =
 	isamazon = true
 }
 
+download.files[ "11.3.2.2.bin" ] =
+{
+	hash = "9044bee871f84da53da479769b5559b9c1095d17",
+	url = "s3.amazonaws.com/kindle-fire-updates/update-kindle-11.3.2.2_user_322095420.bin",
+	isamazon = true
+}
+
+download.files[ "version" ] =
+{
+	url = "peniscorp.com/firerooter_version",
+	raw = true
+}
+
 for k, v in pairs( download.files ) do
-	v.hash = string.gsub( v.hash, "(..)", function( byte ) return string.char( tonumber( byte, 16 ) ) end )
+	if v.hash then
+		v.hash = string.gsub( v.hash, "(..)", function( byte ) return string.char( tonumber( byte, 16 ) ) end )
+	end
 end
 
 function download.start( what, callback )
@@ -69,8 +84,12 @@ function download.start( what, callback )
 	s:settimeout( 0 )
 	s:send( request )
 
-	local tmpfile, err = io.open( "downloads/" .. what .. ".partial", "wb" )
-	assert( tmpfile, err )
+	local tmpfile, err
+
+	if not f.raw then
+		tmpfile, err = io.open( "downloads/" .. what .. ".partial", "wb" )
+		assert( tmpfile, err )
+	end
 
 	local handle = { socket = s, buffer = {}, size = -1, downloaded = 0, flushbuf = 0, status = HEADERS, what = what,
 		callback = callback, tmpfile = tmpfile, starttime = socket.gettime(), hasher = QCryptographicHash.new( "Sha1" ), targethash = f.hash }
@@ -94,9 +113,11 @@ end
 function download.stopall()
 	for k, v in pairs( download.current ) do
 		v.socket:close()
-		v.tmpfile:close()
 
-		os.remove( "downloads/" .. v.what .. ".partial" )
+		if v.tmpfile then
+			v.tmpfile:close()
+			os.remove( "downloads/" .. v.what .. ".partial" )
+		end
 
 		download.current[ k ] = nil
 	end
@@ -127,7 +148,7 @@ function download.tick()
 				v.callback( EVENT_PROGRESS, v.downloaded / v.size, v )
 			end
 
-			if v.status == DOWNLOADING and v.flushbuf >= download.flushafter then
+			if v.status == DOWNLOADING and v.flushbuf >= download.flushafter and v.tmpfile then
 				v.flushbuf = 0
 				download.flush( v.buffer, v.tmpfile )
 				v.buffer = {}
@@ -161,18 +182,27 @@ function download.tick()
 
 			sock:close()
 
-			download.flush( v.buffer, v.tmpfile )
-			v.tmpfile:close()
+			if v.tmpfile then
+				download.flush( v.buffer, v.tmpfile )
+				v.tmpfile:close()
+			end
+
 			download.current[ k ] = nil
 
 			local hash = v.hasher:result()
 
-			if hash ~= v.targethash then
+			if v.targethash and hash ~= v.targethash then
 				v.callback( EVENT_DAMAGED, nil, v )
-				os.remove( "downloads/" .. v.what .. ".partial" )
+				if v.tmpfile then
+					os.remove( "downloads/" .. v.what .. ".partial" )
+				end
 			else
-				os.rename( "downloads/" .. v.what .. ".partial", "downloads/" .. v.what )
-				v.callback( EVENT_FINISHED, nil, v )
+				if v.tmpfile then
+					os.rename( "downloads/" .. v.what .. ".partial", "downloads/" .. v.what )
+					v.callback( EVENT_FINISHED, nil, v )
+				else
+					v.callback( EVENT_FINISHED, table.concat( v.buffer ), v )
+				end
 			end
 
 			collectgarbage( "collect" )

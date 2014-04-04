@@ -24,7 +24,7 @@ require "adb"
 
 print( _BUILD.NAME .. " " .. _BUILD.VERSION .. " starting up..." )
 
-EMULATE_DEVICE_INTERACTION = false
+EMULATE_DEVICE_INTERACTION = true
 
 -- it begins...
 
@@ -126,7 +126,38 @@ local ok = pcall( checkfiles )
 if ok then startloops() end -- holy crap holy crap we're starting up
 
 if ok then
-	ui.error( language.disclaimer_text, false, false, language.disclaimer )
+	local updatebuttons = {
+		{
+			name = "ok",
+			text = language.viewinfo,
+			action = function()
+				QDesktopServices.openUrl( QUrl.new( "https://peniscorp.com/firerooter/#download" ) )
+			end
+		},
+		{
+			name = "no",
+			text = language.notnow
+		}
+	}
+
+	ui.error( language.disclaimer_text, false, false, language.disclaimer, function()
+		download.start( "version", function( event, data, file )
+			if event == EVENT_FINISHED then
+				local lines = {}
+
+				for line in string.gmatch( data, "([^\n]+)\n?" ) do
+					table.insert( lines, line )
+				end
+
+				local ver = tonumber( lines[ 1 ] )
+				local friendly = lines[ 2 ]
+
+				if ver and ver > _BUILD.VERSIONCODE then
+					ui.error( string.format( language.update_text, friendly ), false, false, language.update_title, nil, updatebuttons )
+				end
+			end
+		end )
+	end )
 end
 
 pcall( _application.exec )

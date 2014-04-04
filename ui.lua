@@ -260,7 +260,7 @@ function ui.setbuttons( container, buttons )
 	end
 end
 
-function ui.error( msg, critical, icon, title )
+function ui.error( msg, critical, icon, title, callback, buttons )
 	local frame, contents
 
 	if ui.errorwindow then
@@ -310,14 +310,14 @@ function ui.error( msg, critical, icon, title )
 	contents:resize( frame:width(), 20 + math.max( label:height(), frame.erroricon:height() ) + 50 )
 
 	frame.buttongroup:move( 14, frame:height() - 42 )
+	frame.onclose = callback
 
 	frame:setWindowModality( Qt.WindowModality.ApplicationModal )
 
 	contents.title:setText( title or language.error_title )
 	contents.titleShadow:setText( title or language.error_title )
 
-	ui.setbuttons( frame.buttongroup,
-	{
+	local buttontab = {
 		{
 			name = "ok",
 			text = critical and language.exit or language.ok,
@@ -325,7 +325,19 @@ function ui.error( msg, critical, icon, title )
 				exit( contents.chromabuttons.close )
 			end
 		}
-	} )
+	}
+
+	if buttons then
+		buttontab = {}
+		for k, v in pairs( buttons ) do
+			table.insert( buttontab, { name = v.name, text = v.text, action = function( ... )
+				if v.action then v.action( ... ) end
+				exit( contents.chromabuttons.close )
+			end } )
+		end
+	end
+
+	ui.setbuttons( frame.buttongroup, buttontab )
 
 	ui.centershow( ui.mainwindow[ 1 ] )
 	ui.centershow( frame )
@@ -485,7 +497,7 @@ function ui.debrick_step4()
 
 						adb.run( "getprop ro.rom.type", function( code, out )
 							if not string.find( out, "minisystem" ) then
-								local sys = out:gsub( "\n", "" )
+								local sys = out:gsub( "[\r\n]", "" )
 
 								if #sys == 0 then
 									sys = "<unknown>"
@@ -497,19 +509,23 @@ function ui.debrick_step4()
 								contents.progresslabel:setText( language.debrick_uploadingsystem )
 								contents.progresslabel:adjustSize()
 
-								adb.push( "downloads/" .. contents.fireosversion .. ".bin", "/sdcard/update.zip", function( code, out )
-									if string.find( out, "error" ) then
-										contents.progresslabel:setText( string.format( language.debrick_failedhelp, out ) )
-										contents.progresslabel:adjustSize()
-									else
-										contents.progresslabel:setText( language.debrick_preparingsystem )
-										contents.progresslabel:adjustSize()
+								adb.run( "su -c \"chmod 777 /cache && rm -f /cache/update.zip\"", function( code, out )
+									if out:gsub( "[\r\n ]", "" ) ~= "" then
+										contents.progresslabel:setText( string.format( language.debrick_failedhelp, "chmod failed: " .. tostring( out ) ) )
+										return
+									end
 
-										adb.run( "su -c \"mkdir /cache/recovery\"", function( code, out )
+									adb.push( "downloads/" .. contents.fireosversion .. ".bin", "/cache/update.zip", function( code, out )
+										if string.find( out, "error" ) then
+											contents.progresslabel:setText( string.format( language.debrick_failedhelp, out ) )
+											contents.progresslabel:adjustSize()
+										else
+											contents.progresslabel:setText( language.debrick_preparingsystem )
+											contents.progresslabel:adjustSize()
 
-											local proceed = function()
+											adb.run( "su -c \"mkdir /cache/recovery\"", function( code, out )
 
-												adb.run( "su -c \"cp /sdcard/update.zip /cache/update.zip\"", function( code, out )
+												local proceed = function()
 													_application.beep()
 													adb.run( "su -c \"echo --update_package=/cache/update.zip > /cache/recovery/command\"", function( code, out )
 														contents.progresslabel:setText( language.debrick_done )
@@ -530,20 +546,18 @@ function ui.debrick_step4()
 															}
 														} )
 													end )
-												end )
-											end
+												end
 
-											if not contents.dowipe then
-												proceed()
-											else
-												contents.progresslabel:setText( language.debrick_wiping )
-												adb.run( "su -c \"rm -rf /data/*\"", proceed )
-											end
-
-										end )
-									end
+												if not contents.dowipe then
+													proceed()
+												else
+													contents.progresslabel:setText( language.debrick_wiping )
+													adb.run( "su -c \"rm -rf /data/*\"", proceed )
+												end
+											end )
+										end
+									end )
 								end )
-
 							end
 						end )
 
@@ -737,7 +751,7 @@ function ui.debrick()
 			v:delete()
 		end
 	else
-		frame, contents = ui.createwindow( 300, 160, language.debrick, false, false )
+		frame, contents = ui.createwindow( 300, 180, language.debrick, false, false )
 
 		local label = createwidget( QLabel, contents )
 		label:move( 15, 32 )

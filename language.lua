@@ -41,6 +41,9 @@ language.error_title = "Error"
 language.exit = "Exit"
 language.ok = "OK"
 
+language.viewinfo = "Download update"
+language.notnow = "Not now"
+
 language.error_missingfile = "Missing file \"%s\"! Is your download corrupted?"
 
 language.debrick = "Reinstall FireOS"
@@ -73,3 +76,6 @@ language.debrick_wipe = "Wipe all data on device"
 
 language.disclaimer = "Disclaimer"
 language.disclaimer_text = "This is alpha software. It is not guaranteed to work. By using it, you agree that the author shall have no liability for consequential or incidental damage resulting from the use of this software."
+
+language.update_title = "Update available!"
+language.update_text = "An update to " .. _BUILD.NAME .. " is available (version %s). Do you want to upgrade?"

@@ -26,6 +26,7 @@ end
 
 local emulatedoutputs = {}
 emulatedoutputs[ "getprop ro.rom.type" ] = "minisystem"
+emulatedoutputs[ "su -c \"chmod 777 /cache && rm -f /cache/update.zip\"" ] = ""
 
 function adb.run( command, callback )
 	local sh = command
