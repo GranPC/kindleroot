@@ -749,6 +749,12 @@ end
 function ui.debrick_cancel()
 	if ui.debrickwindow[ 1 ]:isVisible() then
 		close( ui.debrickwindow[ 1 ] )
+
+		download.stopall()
+
+		if ui.debrickwindow[ 2 ].progresslabel then
+			ui.debrickwindow[ 2 ].progresslabel:delete()
+		end
 	end
 end
 
