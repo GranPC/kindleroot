@@ -482,7 +482,7 @@ function ui.debrick_step4()
 
 	ui.setbuttons( contents.buttongroup, {} )
 
-	-- todo: this sucks
+	-- todo: this sucks. coroutines don't work.
 
 	fastboot.waitfordevice( function()
 		contents.progresslabel:setText( language.debrick_flashingminisystem )
@@ -545,6 +545,17 @@ function ui.debrick_step4()
 																action = ui.debrick_cancel
 															}
 														} )
+
+														local function retry()
+															if frame:isVisible() then
+																fastboot.waitfordevice( function()
+																	fastboot.oem( "recovery", retry )
+																	print( "Retrying..." )
+																end )
+															end
+														end
+
+														retry()
 													end )
 												end
 
