@@ -61,7 +61,7 @@ language.debrick_failedhelp = "Failed! (%s) -- please unplug your device and ret
 language.debrick_uploadingsystem = "Uploading FireOS..."
 language.debrick_wiping = "Wiping data..."
 language.debrick_preparingsystem = "Preparing to install FireOS..."
-language.debrick_done = "Done! Rebooting into recovery and installing... Disconnect your factory cable now!"
+language.debrick_done = "Done! Rebooting into recovery and installing... Disconnect your factory cable when the screen goes black! If you don't do it in time, the program will retry."
 
 language.connecting = "Connecting..."
 language.networkerror = "Couldn't connect to the server."

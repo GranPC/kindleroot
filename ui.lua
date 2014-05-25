@@ -484,118 +484,131 @@ function ui.debrick_step4()
 
 	local routine
 
-	routine = coroutine.create( function()
-		local function bail( err )
-			contents.progresslabel:setText( string.format( language.debrick_failedhelp, err or "unknown" ) )
-			contents.progresslabel:adjustSize()
-			coroutine.yield( routine )
-		end
-
-		local lock = false
-
-		local function continue()
-			lock = true
-			coroutine.resume( routine )
-			print( coroutine.status( routine ) )
-		end
-
-		local function yield()
-			if not lock then
-				coroutine.yield()
-				lock = false
-			end
-		end
-
-		contents.progresslabel:setText( language.debrick_flashingminisystem )
-
-		fastboot.flash( "system", "downloads/minisystem.img", continue )
-
-		yield()
-
-		fastboot.continue( function( code, out )
-			if not ( ( util.os() == "Windows" and code == 0 ) or ( util.os ~= "Windows" and code == 1 ) ) then
-				return bail( "status " .. code )
-			end
-
-			continue()
-		end )
-		yield()
-
-		contents.progresslabel:setText( language.debrick_waitingboot )
+	local function bail( err )
+		contents.progresslabel:setText( string.format( language.debrick_failedhelp, err or "unknown" ) )
 		contents.progresslabel:adjustSize()
 
-		adb.waitfordevice( continue )
-		yield()
+		_done = true
+		lock = true
 
-		adb.run( "getprop ro.rom.type", function( code, out )
-			if not string.find( out, "minisystem" ) then
-				local sys = out:gsub( "[\r\n]", "" )
+		print( debug.traceback() )
+		error( err )
+	end
 
-				if #sys == 0 then
-					sys = "<unknown>"
-				end
-				return bail( "booted into " .. sys )
+	local lock = false
+	local _done = false
+
+	local function continue()
+		lock = true
+		_done = true
+	end
+
+	local function wait()
+		if not lock then
+			_done = false
+			while not _done do
+				_application.processEvents()
 			end
+			lock = false
+		end
+	end
 
-			continue()
-		end )
-		yield()
+	contents.progresslabel:setText( language.debrick_flashingminisystem )
 
-		adb.run( "su -c \"chmod 777 /cache && rm -f /cache/update.zip\"", function( code, out )
-			if out:gsub( "[\r\n ]", "" ) ~= "" then
-				return bail( "chmod failed: " .. tostring( out ) )
-			end
+	fastboot.flash( "system", "downloads/minisystem.img", continue )
 
-			continue()
-		end )
-		yield()
+	wait()
 
-		contents.progresslabel:setText( language.debrick_uploadingsystem )
-		contents.progresslabel:adjustSize()
-
-		adb.push("downloads/" .. contents.fireosversion .. ".bin", "/cache/update.zip", function( code, out )
-			if string.find( out, "error" ) then
-				return bail( out )
-			end
-
-			continue()
-		end )
-		yield()
-
-		adb.run( "su -c \"mkdir /cache/recovery\"", continue )
-		yield()
-
-		if contents.dowipe then
-			contents.progresslabel:setText( language.debrick_wiping )
-			adb.run( "su -c \"rm -rf /data/*\"", continue )
-			yield()
+	fastboot.continue( function( code, out )
+		if not ( ( util.os() == "Windows" and code == 0 ) or ( util.os ~= "Windows" and code == 1 ) ) then
+			return bail( "status " .. code )
 		end
 
-		_application.beep()
-
-		adb.run( "su -c \"echo --update_package=/cache/update.zip > /cache/recovery/command\"", continue )
-		yield()
-
-		contents.progresslabel:setText( language.debrick_done )
-		contents.progresslabel:adjustSize()
-
-		-- todo: this is a pain. maybe we can reboot into fastboot, flash recovery into boot and then continue?
-		-- if we do it like that, the user would have plenty of time to unplug the fastboot cable.
-
-		adb.reboot( "recovery", continue )
-		yield()
-
-		ui.setbuttons( contents.buttongroup,
-		{
-			{
-				name = "exit",
-				text = language.exit,
-				action = ui.debrick_cancel
-			}
-		} )
+		continue()
 	end )
+	wait()
 
-	coroutine.resume( routine )
+	contents.progresslabel:setText( language.debrick_waitingboot )
+	contents.progresslabel:adjustSize()
+
+	adb.waitfordevice( continue )
+	wait()
+
+	adb.run( "getprop ro.rom.type", function( code, out )
+		if not string.find( out, "minisystem" ) then
+			local sys = out:gsub( "[\r\n]", "" )
+
+			if #sys == 0 then
+				sys = "<unknown>"
+			end
+			return bail( "booted into " .. sys )
+		end
+
+		continue()
+	end )
+	wait()
+
+	adb.run( "su -c \"chmod 777 /cache && rm -f /cache/update.zip\"", function( code, out )
+		if out:gsub( "[\r\n ]", "" ) ~= "" then
+			return bail( "chmod failed: " .. tostring( out ) )
+		end
+
+		continue()
+	end )
+	wait()
+
+	contents.progresslabel:setText( language.debrick_uploadingsystem )
+	contents.progresslabel:adjustSize()
+
+	adb.push("downloads/" .. contents.fireosversion .. ".bin", "/cache/update.zip", function( code, out )
+		if string.find( out, "error" ) then
+			return bail( out )
+		end
+
+		continue()
+	end )
+	wait()
+
+	adb.run( "su -c \"mkdir /cache/recovery\"", continue )
+	wait()
+
+	if contents.dowipe then
+		contents.progresslabel:setText( language.debrick_wiping )
+		adb.run( "su -c \"rm -rf /data/*\"", continue )
+		wait()
+	end
+
+	_application.beep()
+
+	adb.run( "su -c \"echo --update_package=/cache/update.zip > /cache/recovery/command\"", continue )
+	wait()
+
+	contents.progresslabel:setText( language.debrick_done )
+	contents.progresslabel:adjustSize()
+
+	-- todo: this is a pain. maybe we can reboot into fastboot, flash recovery into boot and then continue?
+	-- if we do it like that, the user would have plenty of time to unplug the fastboot cable.
+
+	adb.reboot( "recovery", continue )
+
+	ui.setbuttons( contents.buttongroup,
+	{
+		{
+			name = "exit",
+			text = language.exit,
+			action = ui.debrick_cancel
+		}
+	} )
+
+	while frame:isVisible() do
+		fastboot.waitfordevice( continue )
+		wait()
+		if not frame:isVisible() then return end
+
+		fastboot.oem( "recovery", continue )
+		wait()
+		if not frame:isVisible() then return end
+	end
 end
 
 function ui.debrick_step3()

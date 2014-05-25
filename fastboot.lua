@@ -52,6 +52,17 @@ function fastboot.flash( partition, file, callback )
 	end
 end
 
+function fastboot.oem( what, callback )
+	local command = util.generatecall( "fastboot", "-i " .. fastboot.id .. " oem " .. what )
+
+	if EMULATE_DEVICE_INTERACTION then
+		print( "Spoofing FB OEM command... Would have run \"" .. command .. "\"" )
+		callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+	else
+		util.run( command, callback )
+	end
+end
+
 function fastboot.continue( callback )
 	local command = util.generatecall( "fastboot", "-i " .. fastboot.id .. " continue" )
 
