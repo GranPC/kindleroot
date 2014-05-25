@@ -19,10 +19,10 @@ EVENT_ERROR		= 3
 
 download.httprequest = "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: curl/7.30.0\r\n\r\n"
 
-download.files[ "minisystem.img" ] =
+download.files[ "minisystem_r2.img" ] =
 {
-	hash = "5f67929e68c07dc0e593e45fce556b43b0b69d23",
-	url = "gmf.dabbleam.com/KFSOWI/minisystem.img",
+	hash = "a4bb77c19ecf021b46e10a83731abac8450aeafb",
+	url = "gmf.dabbleam.com/KFSOWI/minisystem_r2.img",
 	-- alternative url that also works with this script
 	-- in case the above link goes down.
 	-- url = "peniscorp.com/minisystem.bin"
