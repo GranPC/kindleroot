@@ -44,7 +44,9 @@ function fastboot.flash( partition, file, callback )
 
 	if EMULATE_DEVICE_INTERACTION then
 		print( "Spoofing FB flash command... Would have run \"" .. command .. "\"" )
-		callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+		util.run( "sleep 3", function()
+			callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+		end )
 	else
 		util.run( command, callback )
 	end
@@ -55,7 +57,9 @@ function fastboot.continue( callback )
 
 	if EMULATE_DEVICE_INTERACTION then
 		print( "Spoofing FB continue command... Would have run \"" .. command .. "\"" )
-		callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+		util.run( "sleep 1", function()
+			callback( util.os() == "Windows" and 0 or 1, "<emulated device interaction>" )
+		end )
 	else
 		util.run( command, callback )
 	end
