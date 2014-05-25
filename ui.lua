@@ -515,6 +515,14 @@ function ui.debrick_step4()
 
 	contents.progresslabel:setText( language.debrick_flashingminisystem )
 
+	local f = io.open( "downloads/boot.img", "r" )
+
+	if f then
+		f:close()
+		fastboot.flash( "boot", "downloads/boot.img", continue )
+		wait()
+	end
+
 	fastboot.flash( "system", "downloads/minisystem.img", continue )
 
 	wait()
