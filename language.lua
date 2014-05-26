@@ -56,7 +56,7 @@ language.debrick_installing = "Reinstalling FireOS..."
 
 language.debrick_waitfastboot = "Waiting for your Kindle to respond to fastboot requests..."
 language.debrick_flashingminisystem = "Flashing minisystem.img..."
-language.debrick_waitingboot = "Waiting for boot..."
+language.debrick_waitingboot = "Waiting for boot... Make sure the Nexus ADB drivers are installed."
 language.debrick_failedhelp = "Failed! (%s) -- please unplug your device and retry. If the error persists, please turn off your device and ask for help."
 language.debrick_uploadingsystem = "Uploading FireOS..."
 language.debrick_wiping = "Wiping data..."

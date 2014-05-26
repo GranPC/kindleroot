@@ -523,7 +523,7 @@ function ui.debrick_step4()
 		wait()
 	end
 
-	fastboot.flash( "system", "downloads/minisystem.img", continue )
+	fastboot.flash( "system", "downloads/minisystem_r2.img", continue )
 
 	wait()
 
@@ -746,14 +746,14 @@ function ui.debrick_step2()
 
 	frame.onclose = ui.debrick_cancel
 
-	local f = io.open( "downloads/minisystem.img", "rb" )
+	local f = io.open( "downloads/minisystem_r2.img", "rb" )
 
 	if f then
 		f:close()
 		return ui.debrick_step3()
 	end
 
-	local handle = download.start( "minisystem.img", function( event, data, file )
+	local handle = download.start( "minisystem_r2.img", function( event, data, file )
 		if event == EVENT_ERROR or event == EVENT_DAMAGED then
 			contents.progresslabel:setText( event == EVENT_ERROR and language.networkerror or language.filedamaged )
 
