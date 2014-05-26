@@ -217,6 +217,9 @@ function ui.createwindow( w, h, title, ismain, minimizable )
 	window:setWindowFlags( Qt.WindowType.FramelessWindowHint )
 	window:setAttribute( Qt.WidgetAttribute.WA_TranslucentBackground )
 
+	ui.appicon = ui.appicon or loadicon( "app_icon.png" )
+	window:setWindowIcon( ui.appicon )
+
 	local main = createwidget( QWidget, window, "main" )
 	main:setObjectName( "main" )
 	main:resize( w, h )
