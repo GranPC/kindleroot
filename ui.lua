@@ -559,7 +559,7 @@ function ui.debrick_step4()
 	end )
 	wait()
 
-	adb.run( "su -c \"chmod 777 /cache && rm -f /cache/update.zip\"", function( code, out )
+	adb.run( "su -c \"chmod 777 /cache && rm -rf /cache/*\"", function( code, out )
 		if out:gsub( "[\r\n ]", "" ) ~= "" then
 			return bail( "chmod failed: " .. tostring( out ) )
 		end
